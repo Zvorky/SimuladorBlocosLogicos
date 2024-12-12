@@ -27,3 +27,8 @@ O simulador pode ser criado para ser executado em uma máquina, com sistema oper
 Linux de 64 bits. Pode-se ainda criar o simulador com interface Web, devendo-se criar uma página
 para colocá-lo em funcionamento. O simulador deve vir acompanhado de uma instrução para seu
 uso.
+
+# Instruções
+- O programa deve ser executado em Terminal.
+- Ao executar o código Python `SimBlocosLogicos.py` via terminal você se deparará com uma *CLI* auto-explicativa (Menu), neste menu você deve inserir um valor numérico inteiro correspondente à opção desejada, sendo "0" sempre a opção de "Voltar"/"Sair".
+- Estamos usando Python, o limite é sua máquina, ou seja, não há limites de tamanho máximo para os Discos que deseja simular, contanto que possuam 1 ou mais blocos.
