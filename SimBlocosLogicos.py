@@ -10,21 +10,29 @@
 
 
 
+import os, random, string
+
+
+
 # ---[ Métodos de Alocação ]---
 
 def ContiguaAdd(Disk : list, FAT : map, FileName : str, Length : int):
-    Target = 0
-    for FA in FAT:
-        if FA["StartBlock"] - Target >= Length: # Aloca aqui
+    if FileName in FAT.keys():
+        return Disk, FAT, 2
+    for I in range(0, len(Disk)):
+        Null = True
+        for L in range(I, I+Length):
+            if not Disk[L] == "Null":
+                Null = False
+        if Null:
             FAT[FileName] = {
                 "FileName" : FileName,
-                "StartBlock" : Target,
+                "StartBlock" : I,
                 "Length" : Length
             }
-            for I in range(Target, Target+Length):
-                Disk[I] = FileName
+            for L in range(I, I+Length):
+                Disk[L] = FileName
             return Disk, FAT, 0
-        Target = FA["StartBlock"] + FA["Length"]
     return Disk, FAT, 1 # Sem espaço contíguo
 
 def ContiguaRem(Disk : list, FAT : map, FileName):
@@ -37,14 +45,14 @@ def ContiguaRem(Disk : list, FAT : map, FileName):
 
 
 def EncadeadaAdd(Disk : list, FAT : map, FileName : str, Length : int):
-    return Disk
+    return Disk, FAT, 0
 
 def EncadeadaRem(Disk : list, FAT : map, FileName):
     return Disk, FAT, 0
 
 
 def IndexadaAdd(Disk : list, FAT : map, FileName : str, Length : int):
-    return Disk
+    return Disk, FAT, 0
 
 def IndexadaRem(Disk : list, FAT : map, FileName):
     return Disk, FAT, 0
@@ -75,29 +83,35 @@ def Simulation(Method : int, MethodName : str):
         Clear()
         print("Simulando Alocação {}.\n".format(MethodName))
         PrintDisk(Disk, CharMap)
+        print("\nFile Allocation Table:")
+        PrintFAT(FAT, CharMap)
 
         if ErrorCode:
             match Sel:
                 case 1:
-                    print("\nErro ao criar arquivo. ErrorCode:", ErrorCode)
+                    print("\nErro ao criar arquivo.")
                 case 2:
-                    print("\nErro ao remover arquivo. ErrorCode:", ErrorCode)
+                    print("\nErro ao remover arquivo.")
 
-        Sel = IntInput("\n1 - Adicionar Arquivo\n2 - Remover Arquivo\n\n>", "Opção Inválida")
+        Sel = IntInput("\n1 - Adicionar Arquivo\n2 - Remover Arquivo\n\n> ", "Opção Inválida")
         match Sel:
             case 0:
                 pass
             case 1:
-                Disk, FAT, ErrorCode = Add[Method](Disk, FAT, input("Nome do Arquivo: "), IntInput("Tamanho do Arquivo (Blocos): "))
+                Disk, FAT, ErrorCode = Add[Method-1](Disk, FAT, input("Nome do Arquivo: "), IntInput("Tamanho do Arquivo (Blocos): "))
             case 2:
                 FileName = input("Nome do Arquivo: ")
                 if (FileName in FAT.keys()):
-                    Disk, FAT, ErrorCode = Rem[Method](Disk, FAT, FileName)
+                    Disk, FAT, ErrorCode = Rem[Method-1](Disk, FAT, FileName)
                 else:
                     input("Arquivo não encontrado na Tabela de Alocação de Arquivos (FAT).")
             case _:
                 input("Opção {} inválida.".format(Sel))
                 Sel = -1
+
+        for FileName in FAT.keys():
+            if FileName not in CharMap.keys():
+                CharMap[FileName] = NewChar(CharMap)
 
 def MakeDisk():
     Disk = []
@@ -109,7 +123,6 @@ def MakeDisk():
 
 # ---[ Utilitário ]---
 
-import os
 def Clear():
     if (os.getenv("OS")): # NT
         os.system("cls")
@@ -134,6 +147,33 @@ def PrintDisk(Disk : list, CharMap : dict, Columns = 10):
         if not (I+1) % Columns:
             print() # Quebra de Linha
 
+def PrintFAT(FAT : dict, CharMap : dict = {}):
+    if len(FAT) and CharMap:
+        print(end="    ")
+
+    PrintedKeys = False
+    for FA in FAT.values():
+        if not PrintedKeys:
+            for Key in FA.keys():
+                print(Key, end="        ")
+            print()
+            PrintedKeys = True
+        if CharMap:
+            print(CharMap[FA["FileName"]], end="\t")
+        for Value in FA.values():
+            print(Value, end="\t\t")
+        print()
+
+def RandChar():
+    Chars = string.ascii_letters + string.digits + string.punctuation
+    return random.choice(Chars)
+
+def NewChar(CharMap : dict):
+    Char = RandChar()
+    while Char in CharMap.values():
+        Char = RandChar()
+    return Char
+
 
 # ---[ Menu Principal ]---
 
@@ -150,9 +190,13 @@ def Menu():
             case 1:
                 Simulation(Sel, "Contigua")
             case 2:
-                Simulation(Sel, "Encadeada")
+                Clear()
+                input("Não Implementado.\n\n")
+                # Simulation(Sel, "Encadeada")
             case 3:
-                Simulation(Sel, "Indexada")
+                Clear()
+                input("Não Implementado.\n\n")
+                # Simulation(Sel, "Indexada")
             case _:
                 input("Opção {} inválida.".format(Sel))
 
